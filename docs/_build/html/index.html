@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to passcheck &mdash; passcheck  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="passcheck package" href="passcheck.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> passcheck
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="passcheck.html">passcheck package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">passcheck</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>Welcome to passcheck</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-passcheck">
+<h1>Welcome to passcheck<a class="headerlink" href="#welcome-to-passcheck" title="Permalink to this headline"></a></h1>
+<p><strong>passcheck</strong> uses the API from <a class="reference external" href="https://haveibeenpwned.com/">haveibeenpwned.com</a>,
+specifically the method to search compromised passwords with a range. It first converts your password to a SHA-1 password
+and uses the first 5 characters (prefix) to search the database of haveibeenpwned.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">GET</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">api</span><span class="o">.</span><span class="n">pwnedpasswords</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="nb">range</span><span class="o">/</span><span class="p">{</span><span class="n">first</span> <span class="mi">5</span> <span class="nb">hash</span> <span class="n">chars</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The API returns a list of SHA-1 suffixes
+(the remaining 35 characters of a SHA-1 password) that match your prefix and the times it has been compromised.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="mi">0018</span><span class="n">A45C4D1DEF81644B54AB7F969B88D65</span><span class="p">:</span><span class="mi">1</span>
+<span class="o">-</span> <span class="mi">00</span><span class="n">D4F6E8FA6EECAD2A3AA415EEC418D38EC</span><span class="p">:</span><span class="mi">2</span>
+<span class="o">-</span> <span class="mi">011053</span><span class="n">FD0102E94D6AE2F8B83D76FAF94F6</span><span class="p">:</span><span class="mi">1</span>
+<span class="o">-</span> <span class="mi">012</span><span class="n">A7CA357541F0AC487871FEEC1891C49C</span><span class="p">:</span><span class="mi">2</span>
+<span class="o">-</span> <span class="mf">0136E006</span><span class="n">E24E7D152139815FB0FC6A50B15</span><span class="p">:</span><span class="mi">2</span>
+<span class="o">-</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>We then search if there’s a matching suffix to our password and return the times it has been compromised.
+For more information about this method you can check the <a class="reference external" href="https://haveibeenpwned.com/API/v3#SearchingPwnedPasswordsByRange">haveibeenpwned API</a>.</p>
+<section id="example-of-use">
+<h2>Example of use:<a class="headerlink" href="#example-of-use" title="Permalink to this headline"></a></h2>
+<p>You can execute passcheck and write the password(s) as argument(s).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">passcheck</span> <span class="n">password123</span> <span class="n">safe69</span> <span class="n">cheetosflaming_hot</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Checking your password(s)...
+&#39;password123&#39; has been compromised 126927 times, you should consider changing it.
+&#39;safe69&#39; has been compromised 153 times, you should consider changing it.
+&#39;cheetosflaming_hot&#39; hasn&#39;t been compromised.
+Done!
+</pre></div>
+</div>
+<p>Or you can import passcheck.search and use main:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">passcheck</span> <span class="kn">import</span> <span class="n">search</span>
+<span class="n">search</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s1">&#39;helloworld&#39;</span><span class="p">,</span> <span class="s1">&#39;strongpass&#39;</span><span class="p">,</span> <span class="s1">&#39;ivermectin&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Checking your password(s)...
+&#39;helloworld&#39; has been compromised 16418 times, you should consider changing it.
+&#39;strongpass&#39; has been compromised 225 times, you should consider changing it.
+&#39;ivermectin&#39; has been compromised 17 times, you should consider changing it.
+Done!
+</pre></div>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="passcheck.html">passcheck package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="passcheck.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="passcheck.html#module-passcheck.search">passcheck.search module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="passcheck.html#search-py">search.py</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="passcheck.html#module-passcheck">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="passcheck.html#demo-project-passcheck">Demo project: passcheck</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="passcheck.html" class="btn btn-neutral float-right" title="passcheck package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

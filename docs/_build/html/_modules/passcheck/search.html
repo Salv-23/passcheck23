@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>passcheck.search &mdash; passcheck  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> passcheck
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../passcheck.html">passcheck package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">passcheck</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>passcheck.search</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for passcheck.search</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    search.py</span>
+<span class="sd">    ---------</span>
+
+<span class="sd">    This module contains all the functions to convert a string to a SHA-1 password and</span>
+<span class="sd">    use the haveibeenpwned API to see whether the password(s) has been compromised.</span>
+<span class="sd">    It also contains the __main__ construct to make the module executable.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Salvador Estrella&quot;</span>
+
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+<div class="viewcode-block" id="request_api_data"><a class="viewcode-back" href="../../passcheck.html#passcheck.search.request_api_data">[docs]</a><span class="k">def</span> <span class="nf">request_api_data</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetches the response of pwnedpasswords-API using a prefix.</span>
+
+<span class="sd">    :param prefix: The first 5 characters of a SHA-1 password hash (not case sensitive).</span>
+<span class="sd">    :return: A list of suffixes that match our prefix and a count of the times it has</span>
+<span class="sd">            been compromised e.g. 00D4F6E8FA6EECAD2A3AA415EEC418D38EC:2.</span>
+<span class="sd">    :raise RuntimeError: If API returns any HTTP code different to 200, e.g. HTTP 404.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://api.pwnedpasswords.com/range/&quot;</span> <span class="o">+</span> <span class="n">prefix</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error fetching </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">. check the API and try again&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="count_password_leaked"><a class="viewcode-back" href="../../passcheck.html#passcheck.search.count_password_leaked">[docs]</a><span class="k">def</span> <span class="nf">count_password_leaked</span><span class="p">(</span><span class="n">hashes</span><span class="p">,</span> <span class="n">hash_to_check</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks if there&#39;s any hash suffix in the response passed by :func:`request_api_data`</span>
+<span class="sd">    that matches the suffix of our password(s) we get from :func:`pawned_api_check`.</span>
+
+<span class="sd">    :param hashes: The response we get from :func:`request_api_data`</span>
+<span class="sd">    :param hash_to_check: The hash suffix from our password(s) we get from :func:`pawned_api_check`.</span>
+<span class="sd">    :return: If there&#39;s any matching suffix returns the count of times it has been compromised</span>
+<span class="sd">            otherwise returns 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hashes</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
+    <span class="k">for</span> <span class="nb">hash</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">hashes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hash</span> <span class="o">==</span> <span class="n">hash_to_check</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">count</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="pawned_api_check"><a class="viewcode-back" href="../../passcheck.html#passcheck.search.pawned_api_check">[docs]</a><span class="k">def</span> <span class="nf">pawned_api_check</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts password(s) to SHA-1 hash and splits it into suffix(first 5 characters) and</span>
+<span class="sd">    prefix(remaining 35 characters). Invokes both :func:`request_api_data` and :func:`count_password_leaked`.</span>
+
+<span class="sd">    :param password: The password we want to use</span>
+<span class="sd">    :return: The count from :func:`count_password_leaked`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sha1password</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">suffix</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">=</span> <span class="n">sha1password</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span> <span class="n">sha1password</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">request_api_data</span><span class="p">(</span><span class="n">suffix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">count_password_leaked</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../passcheck.html#passcheck.search.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Iterates over a list of passwords strings and checks whether any of them has been compromised,</span>
+<span class="sd">    then prints the results. Two guard clauses are included to prevent misfunction.</span>
+
+<span class="sd">    :param args: A list of strings</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :raise ValueError: If args is not a list or members of args are not strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Passwords must be contained in a list&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">password</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">password</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Passwords must be strings in order to convert them to a SHA-1 hash&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking your password(s)...&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">password</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">pawned_api_check</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">password</span><span class="si">}</span><span class="s2">&#39; has been compromised </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> times, you should consider changing it.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">password</span><span class="si">}</span><span class="s2">&#39; hasn&#39;t been compromised.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
